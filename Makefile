@@ -2,7 +2,7 @@ TARGET  = rusher
 SRC_DIR = src/
 SOURCES = $(wildcard $(SRC_DIR)*.c)
  
-CC      = gcc
+CC      = clang 
 STD     = -std=c11
 DEBUG   = -g
 CFLAGS  += -Werror -Wall -Wextra -Wpedantic $(DEBUG)

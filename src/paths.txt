@@ -1,1 +1,3 @@
 robots.txt
+login
+admin

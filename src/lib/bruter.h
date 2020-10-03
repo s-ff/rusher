@@ -62,13 +62,20 @@ char **create_hosts_list(const char *host, const char *pathname) {
   size_t len = 0;
   ssize_t nread;
 
-  printf("%d\n", count);
   FILE *fp = fopen("paths.txt", "r");
+  int i = 0;
   while ((nread = getline(&line, &len, fp)) != -1) {
-    printf("Retrieved line of length %zu:\n", nread);
-    fwrite(line, nread, 1, stdout);
+    paths[i] = malloc(BUFSIZ * sizeof(char));
+    sprintf(paths[i], "%s", line);
+    i++;
   }
 
+  for (i = 0; i < count; ++i) {
+   printf("paths[i] is %s", paths[i]); 
+  }
+
+  fclose(fp);
   free(line);
+  free(paths);
   exit(0);
 }

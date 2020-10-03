@@ -9,7 +9,7 @@ CFLAGS  += -Werror -Wall -Wextra -Wpedantic $(DEBUG)
 
 
 $(TARGET): $(SOURCES)
-	$(CC) $(DEBUG) $(STD) -o $(TARGET)
+	$(CC) $(DEBUG) $(STD) $(SOURCES) -o $(TARGET)
 
 .PHONY: clean
 

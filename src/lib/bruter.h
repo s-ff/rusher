@@ -4,7 +4,6 @@
 #include <unistd.h>
 
 #define ASSUME_HTTP "http://"
-#define DEBUG
 
 int check_access(const char *pathname) {
   if (access(pathname, F_OK)) {
@@ -46,11 +45,8 @@ char *format_host(const char *host, const char *path) {
   }
 
   sprintf(url + strlen(url), "%s/", host);
-  sprintf(url + strlen(url), "%s/", path);
+  sprintf(url + strlen(url), "%s", path);
 
-#ifdef DEBUG
-  printf("url is %s\n", url);
-#endif
   return url;
 }
 
@@ -62,20 +58,22 @@ char **create_hosts_list(const char *host, const char *pathname) {
   size_t len = 0;
   ssize_t nread;
 
-  FILE *fp = fopen("paths.txt", "r");
+  FILE *fp = fopen(pathname, "r");  // Don't forget to catch errors.
   int i = 0;
   while ((nread = getline(&line, &len, fp)) != -1) {
     paths[i] = malloc(BUFSIZ * sizeof(char));
     sprintf(paths[i], "%s", line);
     i++;
   }
-
-  for (i = 0; i < count; ++i) {
-   printf("paths[i] is %s", paths[i]); 
-  }
-
   fclose(fp);
+#ifdef DEBUG
+  for (i = 0; i < count; ++i) {
+    printf("%s", format_host(host, paths[i]));
+  }
+#endif
+
+  // According to the man pages, a user has to explicity free the line variable.
   free(line);
-  free(paths);
-  exit(0);
+
+  return paths;
 }

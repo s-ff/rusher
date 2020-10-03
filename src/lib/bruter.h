@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #define ASSUME_HTTP "http://"
+#define DEBUG
 
 int check_access(const char *pathname) {
   if (access(pathname, F_OK)) {
@@ -19,7 +20,20 @@ int check_access(const char *pathname) {
   return 0;
 }
 
-char *format_host(const char *host, const char* path) {
+unsigned int count_lines(const char *pathname) {
+  FILE *fp = fopen(pathname, "r");
+  int count = 0;
+  char c = fgetc(fp);
+
+  while (c != EOF) {
+    if (c == '\n') count++;
+    c = fgetc(fp);
+  }
+  fclose(fp);
+  return count;
+}
+
+char *format_host(const char *host, const char *path) {
   regex_t regex;
 
   if (regcomp(&regex, "^https?://", REG_EXTENDED)) {
@@ -33,10 +47,28 @@ char *format_host(const char *host, const char* path) {
 
   sprintf(url + strlen(url), "%s/", host);
   sprintf(url + strlen(url), "%s/", path);
+
+#ifdef DEBUG
   printf("url is %s\n", url);
+#endif
   return url;
 }
 
-char **create_hosts_list(const char *host, FILE *paths) {
-  
+char **create_hosts_list(const char *host, const char *pathname) {
+  int count = count_lines(pathname);
+  char **paths = (char **)malloc(count * sizeof(char *));
+
+  char *line = NULL;
+  size_t len = 0;
+  ssize_t nread;
+
+  printf("%d\n", count);
+  FILE *fp = fopen("paths.txt", "r");
+  while ((nread = getline(&line, &len, fp)) != -1) {
+    printf("Retrieved line of length %zu:\n", nread);
+    fwrite(line, nread, 1, stdout);
+  }
+
+  free(line);
+  exit(0);
 }

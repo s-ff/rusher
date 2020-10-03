@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
   /* Populate host */
   if (check_access(argv[2])) return 0;
 
-  format_host(argv[1], "robots.txt");
-
+  create_hosts_list(argv[1], argv[2]);
   return 0;
 }
+

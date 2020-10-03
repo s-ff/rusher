@@ -1,3 +1,6 @@
+#ifndef BRUTER_H
+#define BRUTER_H
+
 #include <regex.h>
 #include <stdlib.h>
 #include <string.h>
@@ -77,3 +80,4 @@ char **create_hosts_list(const char *host, const char *pathname) {
 
   return paths;
 }
+#endif

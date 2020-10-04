@@ -1,0 +1,19 @@
+---
+os: linux
+language: generic
+compiler: clang
+
+matrix:
+    include:
+        - dist: precise
+          name: precise
+        - dist: trusty
+          name: trusty
+        - dist: xenial
+          name: xenial
+        - dist: bionic
+          name: bionic
+        
+script:
+    - clang --version
+    - make

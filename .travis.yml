@@ -15,6 +15,5 @@ matrix:
           name: bionic
         
 script:
-    - gcc --version
     - clang --version
-		- make
+    - make

@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <curl/curl.h>
+#include <pthread.h>
 
 #define ASSUME_HTTP "http://"
 
@@ -69,11 +71,12 @@ char **create_hosts_list(const char *host, const char *pathname) {
     i++;
   }
   fclose(fp);
-#ifdef DEBUG
   for (i = 0; i < count; ++i) {
+#ifdef DEBUG
     printf("%s", format_host(host, paths[i]));
-  }
 #endif
+    paths[i] = format_host(host, paths[i]);
+  }
 
   // According to the man pages, a user has to explicity free the line variable.
   free(line);
@@ -88,18 +91,16 @@ void request(void *_url) {
   char *url = (char *)_url;
   CURL *curl;
   CURLcode status;
-  char *data;
   long code;
 
   curl = curl_easy_init();
-  data = malloc(BUFFER_SIZE);
-  if (!curl || !data) return;
+  if (!curl) return;
 
   curl_easy_setopt(curl, CURLOPT_URL, url);
   // curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
   curl_easy_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, atol(argv[3]));
+  //curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, atol(argv[3]));
 
   status = curl_easy_perform(curl);
   if (status != 0) {

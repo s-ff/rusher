@@ -80,4 +80,41 @@ char **create_hosts_list(const char *host, const char *pathname) {
 
   return paths;
 }
+
+void request(void *_url) {
+  pthread_t self;
+  self = pthread_self();
+
+  char *url = (char *)_url;
+  CURL *curl;
+  CURLcode status;
+  char *data;
+  long code;
+
+  curl = curl_easy_init();
+  data = malloc(BUFFER_SIZE);
+  if (!curl || !data) return;
+
+  curl_easy_setopt(curl, CURLOPT_URL, url);
+  // curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+  curl_easy_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, atol(argv[3]));
+
+  status = curl_easy_perform(curl);
+  if (status != 0) {
+    fprintf(stderr, "error: unable to request data from %s:\n", url);
+    fprintf(stderr, "%s\n", curl_easy_strerror(status));
+    return;
+  }
+
+  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+
+  fprintf(stdout, "ID: %ld, server responded with code %ld\n", self, code);
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+
+	return;
+}
+
 #endif

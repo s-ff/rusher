@@ -5,11 +5,11 @@ SOURCES = $(wildcard $(SRC_DIR)*.c)
 CC      = clang 
 STD     = -std=c11
 DEBUG   = -g -DDEBUG
-CFLAGS  += -Werror -Wall -Wextra -Wpedantic $(DEBUG)
+CFLAGS  += -Werror -Wall -Wextra -Wpedantic $(DEBUG) -lcurl
 
 
 $(TARGET): $(SOURCES)
-	$(CC) $(DEBUG) $(STD) $(SOURCES) -o $(TARGET)
+	$(CC) $(CFLAGS) $(STD) $(SOURCES) -o $(TARGET)
 
 .PHONY: clean
 

@@ -1,12 +1,12 @@
 #ifndef BRUTER_H
 #define BRUTER_H
 
+#include <curl/curl.h>
+#include <pthread.h>
 #include <regex.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <curl/curl.h>
-#include <pthread.h>
 
 #define ASSUME_HTTP "http://"
 
@@ -51,7 +51,7 @@ char *format_host(const char *host, const char *path) {
 
   sprintf(url + strlen(url), "%s/", host);
   sprintf(url + strlen(url), "%s", path);
-  url[strlen(url)-1] = '\0';
+  url[strlen(url) - 1] = '\0';
 
   return url;
 }
@@ -69,6 +69,7 @@ char **create_hosts_list(const char *host, const char *pathname) {
   while ((nread = getline(&line, &len, fp)) != -1) {
     paths[i] = malloc(BUFSIZ * sizeof(char));
     sprintf(paths[i], "%s", line);
+    paths[i][strlen(paths[i]) - 1] = '\0';
     i++;
   }
   fclose(fp);
@@ -89,33 +90,32 @@ void request(void *_url) {
   pthread_t self;
   self = pthread_self();
 
-  char *url = (char *)_url;
   CURL *curl;
   CURLcode status;
   long code;
-
+  // printf("Received arg is %s|\n", (char*) _url);
   curl = curl_easy_init();
   if (!curl) return;
-  curl_easy_setopt(curl, CURLOPT_URL, url);
+  curl_easy_setopt(curl, CURLOPT_URL, (char *)_url);
   // curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
   curl_easy_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
-  //curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, atol(argv[3]));
+  // curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, atol(argv[3]));
 
   status = curl_easy_perform(curl);
   if (status != 0) {
-    fprintf(stderr, "Error: unable to request data from %s\n", url);
+    fprintf(stderr, "Error: unable to request data from #%s#\n", (char *)_url);
     fprintf(stderr, "%s\n", curl_easy_strerror(status));
     return;
   }
-
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+  if (code == 200 || code == 301)
+    fprintf(stdout, "%15s\t\t\t\t%4ld\n", (char *)_url, code);
 
-  fprintf(stdout, "%s\t\t%ld\n", url, code);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-	return;
+  return;
 }
 
 #endif

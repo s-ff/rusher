@@ -104,14 +104,14 @@ void request(void *_url) {
 
   status = curl_easy_perform(curl);
   if (status != 0) {
-    fprintf(stderr, "error: unable to request data from %s:\n", url);
+    fprintf(stderr, "Error: unable to request data from %s\n", url);
     fprintf(stderr, "%s\n", curl_easy_strerror(status));
     return;
   }
 
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
 
-  fprintf(stdout, "%s server responded with code %ld\n", url, code);
+  fprintf(stdout, "%s\t\t%ld\n", url, code);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 

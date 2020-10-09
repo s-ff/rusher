@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
   threadpool thpool = thpool_init(num_threads);
 
   puts("Adding tasks to threadpool");
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < (int) count_lines(argv[2]); i++) {
     thpool_add_work(thpool, request, (void*) hosts_list[i]);
   };
 

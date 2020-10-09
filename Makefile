@@ -5,7 +5,7 @@ SOURCES = $(wildcard $(SRC_DIR)*.c $(SRC_DIR)*/*.c)
 CC      = clang 
 STD     = -std=c11
 DEBUG   = -g -DDEBUG
-CFLAGS  += -Werror -Wall -Wextra -Wpedantic $(DEBUG)
+CFLAGS  += -Werror -Wall -Wextra -Wpedantic # $(DEBUG)
 LDFLAGS = -pthread -lcurl
 
 

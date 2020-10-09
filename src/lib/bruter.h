@@ -51,6 +51,7 @@ char *format_host(const char *host, const char *path) {
 
   sprintf(url + strlen(url), "%s/", host);
   sprintf(url + strlen(url), "%s", path);
+  url[strlen(url)-1] = '\0';
 
   return url;
 }
@@ -95,7 +96,6 @@ void request(void *_url) {
 
   curl = curl_easy_init();
   if (!curl) return;
-
   curl_easy_setopt(curl, CURLOPT_URL, url);
   // curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
@@ -111,7 +111,7 @@ void request(void *_url) {
 
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
 
-  fprintf(stdout, "ID: %ld, server responded with code %ld\n", self, code);
+  fprintf(stdout, "%s server responded with code %ld\n", url, code);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 

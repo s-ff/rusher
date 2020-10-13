@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "lib/argparser.c"
+#include "lib/argparser.h"
 #include "lib/bruter.h"
 #include "lib/tpool.h"
 

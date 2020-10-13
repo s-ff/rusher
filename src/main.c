@@ -2,11 +2,13 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include "lib/argparser.c"
 #include "lib/bruter.h"
 #include "lib/tpool.h"
-#include "lib/argparser.c"
 
 int main(int argc, char** argv) {
+  /* Our argp parser. */
+  static struct argp argp = {options, parse_opt, args_doc, doc};
 
   struct arguments arguments;
 
@@ -18,12 +20,12 @@ int main(int argc, char** argv) {
   arguments.followredirects = 0;
   arguments.threads = 10;
   arguments.statuscodes = "200,204,301,302,307,401,403";
-  arguments.useragent = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0";
-
+  arguments.useragent =
+      "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0";
 
   /* Parse our arguments; every option seen by parse_opt will
      be reflected in arguments. */
-  argp_parse (&argp, argc, argv, 0, 0, &arguments);
+  argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
   /* Check if file exits and user has read permissions */
   if (check_access(argv[2])) return 0;
@@ -36,8 +38,8 @@ int main(int argc, char** argv) {
   threadpool thpool = thpool_init(num_threads);
 
   puts("Adding tasks to threadpool");
-  for (int i = 0; i < (int) count_lines(argv[2]); i++) {
-    thpool_add_work(thpool, request, (void*) hosts_list[i]);
+  for (int i = 0; i < (int)count_lines(argv[2]); i++) {
+    thpool_add_work(thpool, request, (void*)hosts_list[i]);
   };
 
   thpool_wait(thpool);

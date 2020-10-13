@@ -7,8 +7,6 @@
 #include "lib/tpool.h"
 
 int main(int argc, char** argv) {
-  /* Our argp parser. */
-  static struct argp argp = {options, parse_opt, args_doc, doc};
 
   struct arguments arguments;
 
@@ -28,17 +26,17 @@ int main(int argc, char** argv) {
   argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
   /* Check if file exits and user has read permissions */
-  if (check_access(argv[2])) return 0;
+  if (check_access(arguments.wordlist)) return 0;
 
   /* Create a list of hosts from the input host */
-  char** hosts_list = create_hosts_list(argv[1], argv[2]);
+  char** hosts_list = create_hosts_list(arguments.args[0], arguments.wordlist);
 
-  int num_threads = atoi(argv[3]);
+  int num_threads = arguments.threads;
   printf("Making threadpool with %d threads\n", num_threads);
   threadpool thpool = thpool_init(num_threads);
 
   puts("Adding tasks to threadpool");
-  for (int i = 0; i < (int)count_lines(argv[2]); i++) {
+  for (int i = 0; i < (int) count_lines(arguments.wordlist); i++) {
     thpool_add_work(thpool, request, (void*)hosts_list[i]);
   };
 
@@ -46,7 +44,7 @@ int main(int argc, char** argv) {
   puts("Killing threadpool");
   thpool_destroy(thpool);
 
-  for (unsigned int i = 0; i < count_lines(argv[2]); i++) free(hosts_list[i]);
+  for (unsigned int i = 0; i < count_lines(arguments.wordlist); i++) free(hosts_list[i]);
   free(hosts_list);
   return 0;
 }

@@ -4,12 +4,26 @@
 
 #include "lib/bruter.h"
 #include "lib/tpool.h"
+#include "lib/argparser.c"
 
 int main(int argc, char** argv) {
-  if (argc != 4) {
-    fprintf(stderr, "Usage: %s\n", *argv);
-    exit(1);
-  }
+
+  struct arguments arguments;
+
+  /* Default values. */
+  arguments.silent = 0;
+  arguments.verbose = 0;
+  arguments.output_file = "-";
+  arguments.wordlist = "Wordlist";
+  arguments.followredirects = 0;
+  arguments.threads = 10;
+  arguments.statuscodes = "200,204,301,302,307,401,403";
+  arguments.useragent = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0";
+
+
+  /* Parse our arguments; every option seen by parse_opt will
+     be reflected in arguments. */
+  argp_parse (&argp, argc, argv, 0, 0, &arguments);
 
   /* Check if file exits and user has read permissions */
   if (check_access(argv[2])) return 0;
@@ -34,4 +48,3 @@ int main(int argc, char** argv) {
   free(hosts_list);
   return 0;
 }
-

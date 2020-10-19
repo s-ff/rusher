@@ -1,13 +1,21 @@
 #define _GNU_SOURCE
 #include <stdio.h>
+#include <assert.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
+
 #include "lib/argparser.h"
-#include "lib/bruter.h"
+#include "lib/utils.h"
 #include "lib/tpool.h"
 
-int main(int argc, char** argv) {
-
+int main(int argc, char **argv) {
   struct arguments arguments;
 
   /* Default values. */
@@ -28,23 +36,51 @@ int main(int argc, char** argv) {
   /* Check if file exits and user has read permissions */
   if (check_access(arguments.wordlist)) return 0;
 
-  /* Create a list of hosts from the input host */
-  char** hosts_list = create_hosts_list(arguments.args[0], arguments.wordlist);
+  const char *wordlist = arguments.wordlist;
 
-  int num_threads = arguments.threads;
-  printf("Making threadpool with %d threads\n", num_threads);
-  threadpool thpool = thpool_init(num_threads);
+  int fd = open(wordlist, O_RDWR);
+  assert(fd >= 0);
 
-  puts("Adding tasks to threadpool");
-  for (int i = 0; i < (int) count_lines(arguments.wordlist); i++) {
-    thpool_add_work(thpool, request, (void*)hosts_list[i]);
-  };
+  struct stat statbuf;
+  int err = fstat(fd, &statbuf);
+  assert(err >= 0);
 
+  char *ptr = mmap(NULL, statbuf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  assert(ptr != MAP_FAILED);
+  close(fd);
+
+  char *line = NULL;
+  size_t len = 0;
+  ssize_t nread;
+
+  FILE *stream = fopen(wordlist, "r");
+  assert(stream != NULL);
+
+  while ((nread = getline(&line, &len, stream)) != -1) {
+    char url[BUFSIZ] = {0};
+    char *host = "http://ensias.um5.ac.ma";
+    snprintf(url, BUFSIZ, "%s/", host);
+
+    line[strlen(line) - 1] = '\0';
+
+    /* append new string using length of previously added string */
+    snprintf(url + strlen(url), BUFSIZ - strlen(url), "%s", line);
+
+    // url[strlen(url) - 1] = '\0';
+#ifdef DEBUG
+    printf("%s\n", url);
+#endif
+    thpool_add_work(thpool, request, (void *) url);
+  }
+
+  free(line);
+  fclose(stream);
+
+  err = munmap(ptr, statbuf.st_size);
+  assert(err >= 0);
+  
   thpool_wait(thpool);
-  puts("Killing threadpool");
-  thpool_destroy(thpool);
+  thpool_destroy();
 
-  for (unsigned int i = 0; i < count_lines(arguments.wordlist); i++) free(hosts_list[i]);
-  free(hosts_list);
   return 0;
 }

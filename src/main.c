@@ -1,5 +1,4 @@
 #define _GNU_SOURCE
-#include <stdio.h>
 #include <assert.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -10,10 +9,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-
 #include "lib/argparser.h"
-#include "lib/utils.h"
 #include "lib/tpool.h"
+#include "lib/utils.h"
 
 int main(int argc, char **argv) {
   struct arguments arguments;
@@ -56,31 +54,37 @@ int main(int argc, char **argv) {
   FILE *stream = fopen(wordlist, "r");
   assert(stream != NULL);
 
+  threadpool thpool = thpool_init(arguments.threads);
+
   while ((nread = getline(&line, &len, stream)) != -1) {
     char url[BUFSIZ] = {0};
-    char *host = "http://ensias.um5.ac.ma";
+    char *host = arguments.args[0];
     snprintf(url, BUFSIZ, "%s/", host);
 
+    // TODO: I have to fix trailing white spaces, such as
+    // multiple carriage returns \r.
+    // This is a temporarily fix in case of one \r character.
     line[strlen(line) - 1] = '\0';
+    size_t s = strlen(line);
+    if (s && (line[s-1] == '\r')) line[--s] = 0;
 
     /* append new string using length of previously added string */
-    snprintf(url + strlen(url), BUFSIZ - strlen(url), "%s", line);
+    snprintf(url + strlen(url), BUFSIZ - strlen(url), "%s\n", line);
+    
+    url[strlen(url) - 1] = '\0';
 
-    // url[strlen(url) - 1] = '\0';
-#ifdef DEBUG
-    printf("%s\n", url);
-#endif
-    thpool_add_work(thpool, request, (void *) url);
+    thpool_add_work(thpool, request, (void *)url);
+    usleep(100);
   }
+
+  thpool_wait(thpool);
+  thpool_destroy(thpool);
 
   free(line);
   fclose(stream);
 
   err = munmap(ptr, statbuf.st_size);
   assert(err >= 0);
-  
-  thpool_wait(thpool);
-  thpool_destroy();
 
   return 0;
 }

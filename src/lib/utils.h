@@ -96,22 +96,27 @@ void request(void *_url) {
   // printf("Received arg is %s|\n", (char*) _url);
   curl = curl_easy_init();
   if (!curl) return;
-  curl_easy_setopt(curl, CURLOPT_URL, (char *)_url);
+  curl_easy_setopt(curl, CURLOPT_URL, (const char *)_url);
   // curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
   curl_easy_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
   // curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, atol(argv[3]));
-
+#ifdef DEBUG
+  fprintf(stdout, "%lu is traiting: %s\n", pthread_self(), (char *)_url);
+#endif
   status = curl_easy_perform(curl);
   if (status != 0) {
-    fprintf(stderr, "Error: unable to request data from #%s#\n", (char *)_url);
+    fprintf(stderr, "Error: unable to request data from %s\n", (char *)_url);
     fprintf(stderr, "%s\n", curl_easy_strerror(status));
     return;
   }
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
   if (code == 200 || code == 301)
-    fprintf(stdout, "%15s\t\t\t\t%4ld\n", (char *)_url, code);
+    fprintf(stdout, "%-60s%4ld\n", (char *)_url, code);
 
+#ifdef DEBUG
+  fprintf(stdout, "%lu  has finished its request.\n", self);
+#endif
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 

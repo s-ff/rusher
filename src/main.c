@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     url[strlen(url) - 1] = '\0';
 
     thpool_add_work(thpool, request, (void *)url);
-    usleep(100);
+    //usleep(100);
   }
 
   thpool_wait(thpool);

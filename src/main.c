@@ -73,6 +73,26 @@ int main(int argc, char **argv) {
     thpool_add_work(thpool, request, (void *) url);
   }
 
+<<<<<<< Updated upstream
+=======
+  for (unsigned long int i = 0; i < 100000; i++) {
+    if (hosts[i]) {
+      printf("hosts[%lu] is %s\n", i, hosts[i]);
+      thpool_add_work(thpool, request, (void *) hosts[i]);
+    }
+  }
+
+  for (unsigned long int i = 0; i < 100000; i++) {
+    if (hosts[i]) {
+      free(hosts[i]);
+    }
+  }
+  free(hosts);
+
+  thpool_wait(thpool);
+  thpool_destroy(thpool);
+
+>>>>>>> Stashed changes
   free(line);
   fclose(stream);
 
